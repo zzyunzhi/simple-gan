@@ -22,6 +22,11 @@ def get_toy_dataset(n=20000):
     return 2 * scaled_data - 1
 
 
+def process_batch_fn(batch):
+    # no data processing
+    return batch
+
+
 def eval_one_epoch(*, gen, disc, device):
     """
 
@@ -85,6 +90,12 @@ def train(train_data, use_asymm_gen_loss=True, use_gpu=False):
     if use_gpu:
         torch.cuda.set_device(constant.device)
 
+    """ Build data loader and data processor function """
+
+    train_loader = data.DataLoader(
+        dataset=train_data, batch_size=hp.batch_size, shuffle=True
+    )
+
     """ Build networks """
 
     gen = Generator().to(constant.device)
@@ -111,13 +122,6 @@ def train(train_data, use_asymm_gen_loss=True, use_gpu=False):
 
         def gen_loss_fn(real, fake):
             return (1 - disc(fake)).log().mean()
-
-    """ Build data loader and data processor function """
-
-    train_loader = data.DataLoader(
-        dataset=train_data, batch_size=hp.batch_size, shuffle=True
-    )
-    process_batch_fn = lambda batch: batch
 
     """ Traning loop """
 
